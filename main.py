@@ -62,48 +62,56 @@ win = Tk()
 win.title("Alarm")
 win.geometry("400x200")
 win.resizable(False,False)
-time_format = Label(win, text="Enter time in 24 hour format!", fg="red", bg="black"
+#tab control
+tabControl = ttk.Notebook(win)
+tab_alarm = ttk.Frame(tabControl)
+tab_timer = ttk.Frame(tabControl)
+tabControl.add(tab_alarm, text= 'Alarm')
+tabControl.add(tab_timer, text = 'Timer')
+tabControl.pack(expand = 1, fill = "both")
+
+#labels
+time_format = Label(tab_alarm, text="Enter time in 24 hour format!", fg="red", bg="black"
                     , font="Times")
 time_format.place(x = 110, y = 120)
-addtime = Label(win, text = "Hour   Min     Sec", font = 60).place(x = 110)
-setyouralarm = Label(win, text = "when to operate: ", fg= "blue", relief = "solid",
+addtime = Label(tab_alarm, text = "Hour   Min     Sec", font = 60).place(x = 110)
+set_your_alarm = Label(tab_alarm, text = "when to operate: ", fg= "blue", relief = "solid",
                      font = ("Helvetica", 9, "bold")).place(x = 0, y = 29)
 
 # Variables for entries
 hour = IntVar()
 Min = IntVar()
 sec = IntVar()
-
 # Entries
-hourtime = Entry(win, textvariable = hour, bg = "pink", width = 15)
+hourtime = Entry(tab_alarm, textvariable = hour, bg = "pink", width = 15)
 hourtime.place(x = 110, y = 30)
-mintime = Entry(win, textvariable = Min, bg = "pink", width = 15)
+mintime = Entry(tab_alarm, textvariable = Min, bg = "pink", width = 15)
 mintime.place(x = 150, y = 30)
-sectime = Entry(win, textvariable = sec, bg = "pink", width = 15)
+sectime = Entry(tab_alarm, textvariable = sec, bg = "pink", width = 15)
 sectime.place(x = 200, y = 30)
 
 # submit button
-submit = ttk.Button(win, text = "Submit", command = run)
+submit = ttk.Button(tab_alarm, text = "Submit", command = run)
 submit.place(x = 255, y = 90)
 
 # Real time Label
-time_update = Label(win)
+time_update = Label(tab_alarm)
 time_update.place(x = 353, y = 180)
 real_time()
 
 # Alarm time
-operation_label = Label(win, text = 'operation time:', font = ("Helvetica", 9, "bold"))
+operation_label = Label(tab_alarm, text = 'operation time:', font = ("Helvetica", 9, "bold"))
 operation_label.place(x = 0, y = 60)
-time_set = Label(win)
+time_set = Label(tab_alarm)
 time_set.place(x = 90, y = 60)
 
 # spin box
-spin_label = Label(win, text = 'Select Operation: ',
+spin_label = Label(tab_alarm, text = 'Select Operation: ',
                    font = ("Helvetica", 9, "bold"))
 spin_label.place(x = 0, y = 90)
 spin_Vars = StringVar()
 spin_Vars.set('Alarm')
-sp = ttk.Spinbox(win, values=('Shutdown', 'Restart', 'Sleep', 'Alarm'),
+sp = ttk.Spinbox(tab_alarm, values=('Shutdown', 'Restart', 'Sleep', 'Alarm'),
                  textvariable=spin_Vars, state='readonly')
 sp.place(x = 110, y = 92)
 
