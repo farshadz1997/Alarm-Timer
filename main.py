@@ -115,4 +115,29 @@ sp = ttk.Spinbox(tab_alarm, values=('Shutdown', 'Restart', 'Sleep', 'Alarm'),
                  textvariable=spin_Vars, state='readonly')
 sp.place(x = 110, y = 92)
 
+'''tab_timer GUI'''
+#labels
+label_topic = Label(tab_timer, text = 'Timer', fg = 'red', font = ("Helvetica", 18, "bold")).place(x = 170 , y = 2)
+label_timer = Label(tab_timer, text = "Hour : min : sec ==>", fg = 'blue', font = ("Helvetica", 9, "bold")).place(x = 10, y = 45)
+
+#Entries
+hourT_Var = IntVar()
+minT_Var = IntVar()
+secT_Var = IntVar()
+hourT_ent = ttk.Entry(tab_timer, textvariable = hourT_Var, width = 5)
+hourT_ent.place(x = 130, y = 45)
+minT_ent = ttk.Entry(tab_timer, textvariable = minT_Var, width = 5)
+minT_ent.place(x = 170, y = 45)
+secT_ent = ttk.Entry(tab_timer, textvariable = secT_Var, width = 5)
+secT_ent.place(x = 210, y = 45)
+
+#countdown labels
+countdown_Var = StringVar()
+countdown_label = Label(tab_timer, textvariable = countdown_Var, font = ("Helvetica", 14, "bold"))
+countdown_label.place(x = 180, y = 100)
+
+#countdown button
+start_timer_btn = ttk.Button(tab_timer , text = "Start").place(x = 255, y = 43)
+
+
 win.mainloop()
