@@ -1,143 +1,132 @@
-import os
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox as msg
 import time
 import datetime
-from tkinter import messagebox as msg
+import os
 import threading
 
-# Alarm function
-def alarm(set_alarm_timer):
-    while True:
-        time.sleep(1)
-        operation = sp.get()
+class App:
+    def __init__(self, master):
+        self.master = master
+        self.tabControl = ttk.Notebook(self.master)
+        self.tab_alarm = ttk.Frame(self.tabControl)
+        self.tab_timer = ttk.Frame(self.tabControl)
+        self.tabControl.add(self.tab_alarm, text = 'Alarm')
+        self.tabControl.add(self.tab_timer, text = 'Timer')
+        self.tabControl.pack(expand = 1, fill = 'both')
+        App.Tab_alarm(self)
+        App.Tab_timer(self)
+        App.Realtime(self)
+        
+    def Tab_alarm(self):
+        #labels
+        self.Alarm_Label = Label(self.tab_alarm, text = 'Alarm', fg = 'red', font = ("Helvetica", 18, "bold")).place(x = 170, y = 2)
+        self.set_time_Label = Label(self.tab_alarm, text = 'Set time in 24h format (HH : MM : SS):', fg = 'blue', 
+                                    font = ("Helvetica", 9, "bold")).place(x = 0, y = 60)
+        #variables
+        self.hour = IntVar()
+        self.minute = IntVar()
+        self.second = IntVar()
+        #Entries
+        self.hourtime = ttk.Entry(self.tab_alarm, textvariable = self.hour, width = 5)
+        self.hourtime.place(x = 220, y = 60)
+        self.mintime = ttk.Entry(self.tab_alarm, textvariable = self.minute, width = 5)
+        self.mintime.place(x = 260, y = 60)
+        self.sectime = ttk.Entry(self.tab_alarm, textvariable = self.second, width = 5)
+        self.sectime.place(x = 300, y = 60)
+        #Alarm time
+        self.operation_label = Label(self.tab_alarm, text = 'Operation time:', font = ("Helvetica", 9, "bold")).place(x = 0, y = 90)
+        self.time_set = Label(self.tab_alarm)
+        self.time_set.place(x = 92, y = 90)
+        #Operations
+        self.operation_label = Label(self.tab_alarm, text = "Select operation:", font = ("Helvetica", 9, "bold")).place(x = 0, y = 120)
+        self.options_Var = StringVar()
+        self.options_list = ["Alarm", "Shutdown", "Restart", "Sleep"]
+        self.optionmenu = ttk.OptionMenu(self.tab_alarm, self.options_Var, "Select an Option", *self.options_list )
+        self.optionmenu.place(x = 110, y = 120)
+        #submit button
+        self.submit_button = ttk.Button(self.tab_alarm, text = "Submit", command = self.Check_Entry).place(x = 170, y = 180)
+        
+    def Tab_timer(self):
+        #labels
+        self.label_topic = Label(self.tab_timer, text = 'Timer', fg = 'red', font = ("Helvetica", 18,"bold")).place(x = 170, y = 2)
+        self.label_set = Label(self.tab_timer, text = "Hour : min : sec ==>", fg = 'blue', font = ("Helvetica", 9,"bold")).place(x = 0, y = 60)
+        #variables
+        self.hourT_Var = IntVar()
+        self.minT_Var = IntVar()
+        self.secT_Var = IntVar()
+        #Entries
+        self.hourT_ent = ttk.Entry(self.tab_timer, textvariable = self.hourT_Var, width = 5)
+        self.hourT_ent.place(x = 130, y = 60)
+        self.minT_ent = ttk.Entry(self.tab_timer, textvariable = self.minT_Var, width = 5)
+        self.minT_ent.place(x = 170, y = 60)
+        self.secT_ent = ttk.Entry(self.tab_timer, textvariable = self.secT_Var, width = 5)
+        self.secT_ent.place(x = 210, y = 60)
+        #countdown label
+        self.Countdown_Var = StringVar()
+        self.Countdown_label = Label(self.tab_timer, textvariable = self.Countdown_Var, font = ("Helvetica", 14, "bold"))
+        self.Countdown_label.place(x = 155, y = 150)
+        #countdown button
+        self.start_timer_btn = ttk.Button(self.tab_timer, text = "Start", command = lambda: self.Check_Entry(Timer = True)).place(x = 260, y = 58)
+    #adding clock    
+    def Realtime(self):
+        self.clock_label = Label(self.master)
+        self.clock_label.place(x = 353, y = 280)
+        App.Clock(self)
+    #check clock loop    
+    def Clock(self):
         current_time = datetime.datetime.now()
         now = current_time.strftime("%H:%M:%S")
-        if now == set_alarm_timer:
-            if operation == 'Alarm':
-                msg.showinfo('Alarm', 'Times up!')
-            elif operation == 'Shutdown':
-                msg.showwarning('Alarm',
-                                       'Shutting down...')
-                os.system("shutdown /s /t")
-            elif operation == 'Restart':
-                msg.showwarning('Alarm', 'Restaring...')
-                os.system("shutdown /r /t")
+        self.clock_label.config(text = now)
+        self.clock_label.after(1000, App.Clock, self)
+    #Entries check in this method
+    def Check_Entry(self, Timer: bool = False):
+        if not Timer:
+            if (self.hour.get() not in range (0, 24)) or (self.minute.get() not in range (0, 59)) or (self.second.get() not in range (0, 59)):
+                msg.showerror("Error", "Wrong entries, please check your inputs.")
+                self.hour.set(0)
+                self.minute.set(0)
+                self.second.set(0)
             else:
-                msg.showwarning('Alarm', 'Sleeping...')
-                os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+                set_alarm = f"{self.hour.get():02d}:{self.minute.get():02d}:{self.second.get():02d}"
+                self.time_set.config(text = set_alarm)
+                threading.Thread(target = lambda : self.Alarm(set_alarm), daemon = True).start() #*TODO: jaye tabe set kardn alarme  
         else:
-            pass
+            if (self.hourT_Var.get() < 0) or (self.minT_Var.get() not in range(0, 59)) or (self.secT_Var.get() not in range(0, 59)):
+                msg.showerror("Error", "Wrong entries, please check your inputs.")
+                self.hourT_Var.set(0)
+                self.minT_Var.set(0)
+                self.secT_Var.set(0)
+            else:
+                pass #*TODO: jaye tabe start countdown
+    #Alarm function
+    def Alarm(self, Time):
+        while True:
+            time.sleep(1)
+            ops = self.options_Var.get()
+            if ops == "Select an Option":
+                self.options_Var.set("Alarm")
+            current_time = datetime.datetime.now()
+            now = current_time.strftime("%H:%M:%S")
+            if now == Time:
+                if ops == 'Alarm':
+                    msg.showinfo('Alarm', 'Times Up!')
+                elif ops == 'Shutdown':
+                    msg.showwarning('Alarm', 'Shutting down...')
+                    os.system("shutdown /s /t")
+                elif ops == 'Restart':
+                    msg.showwarning('Alarm', 'Restarting...')
+                    os.system("shutdown /r /t")
+                else:
+                    msg.showwarning('Alarm', 'Sleeping...')
+                    os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
 
-# check entries for true values
-def check_entry():
-    if (hour.get() not in range (0, 24)) or (Min.get() not in range (0, 59)) or (sec.get() not in range (0, 59)):
-        msg.showerror("Error","Wrong entries!")
-        hourtime.delete(0,END)
-        hour.set(0)
-        mintime.delete(0,END)
-        Min.set(0)
-        sectime.delete(0,END)
-        sec.set(0)
-    else:
-        actual_time()
-
-# add time for operation
-def actual_time():
-    set_alarm_timer = f"{hour.get():02d}:{Min.get():02d}:{sec.get():02d}"
-    time_set.config(text=set_alarm_timer)
-    alarm(set_alarm_timer)
-
-# real time clock
-def real_time():
-    current_time = datetime.datetime.now()
-    now = current_time.strftime("%H:%M:%S")
-    time_update.config(text = now)
-    time_update.after(1000, real_time)
-
-def run():
-    threading.Thread(target=check_entry, daemon=True).start()
-
-win = Tk()
-win.title("Alarm")
-win.geometry("400x200")
-win.resizable(False,False)
-#tab control
-tabControl = ttk.Notebook(win)
-tab_alarm = ttk.Frame(tabControl)
-tab_timer = ttk.Frame(tabControl)
-tabControl.add(tab_alarm, text= 'Alarm')
-tabControl.add(tab_timer, text = 'Timer')
-tabControl.pack(expand = 1, fill = "both")
-
-#labels
-time_format = Label(tab_alarm, text="Enter time in 24 hour format!", fg="red", bg="black"
-                    , font="Times")
-time_format.place(x = 110, y = 120)
-addtime = Label(tab_alarm, text = "Hour   Min     Sec", font = 60).place(x = 110)
-set_your_alarm = Label(tab_alarm, text = "when to operate: ", fg= "blue", relief = "solid",
-                     font = ("Helvetica", 9, "bold")).place(x = 0, y = 29)
-
-# Variables for entries
-hour = IntVar()
-Min = IntVar()
-sec = IntVar()
-# Entries
-hourtime = Entry(tab_alarm, textvariable = hour, bg = "pink", width = 15)
-hourtime.place(x = 110, y = 30)
-mintime = Entry(tab_alarm, textvariable = Min, bg = "pink", width = 15)
-mintime.place(x = 150, y = 30)
-sectime = Entry(tab_alarm, textvariable = sec, bg = "pink", width = 15)
-sectime.place(x = 200, y = 30)
-
-# submit button
-submit = ttk.Button(tab_alarm, text = "Submit", command = run)
-submit.place(x = 255, y = 90)
-
-# Real time Label
-time_update = Label(tab_alarm)
-time_update.place(x = 353, y = 180)
-real_time()
-
-# Alarm time
-operation_label = Label(tab_alarm, text = 'operation time:', font = ("Helvetica", 9, "bold"))
-operation_label.place(x = 0, y = 60)
-time_set = Label(tab_alarm)
-time_set.place(x = 90, y = 60)
-
-# spin box
-spin_label = Label(tab_alarm, text = 'Select Operation: ',
-                   font = ("Helvetica", 9, "bold"))
-spin_label.place(x = 0, y = 90)
-spin_Vars = StringVar()
-spin_Vars.set('Alarm')
-sp = ttk.Spinbox(tab_alarm, values=('Shutdown', 'Restart', 'Sleep', 'Alarm'),
-                 textvariable=spin_Vars, state='readonly')
-sp.place(x = 110, y = 92)
-
-'''tab_timer GUI'''
-#labels
-label_topic = Label(tab_timer, text = 'Timer', fg = 'red', font = ("Helvetica", 18, "bold")).place(x = 170 , y = 2)
-label_timer = Label(tab_timer, text = "Hour : min : sec ==>", fg = 'blue', font = ("Helvetica", 9, "bold")).place(x = 10, y = 45)
-
-#Entries
-hourT_Var = IntVar()
-minT_Var = IntVar()
-secT_Var = IntVar()
-hourT_ent = ttk.Entry(tab_timer, textvariable = hourT_Var, width = 5)
-hourT_ent.place(x = 130, y = 45)
-minT_ent = ttk.Entry(tab_timer, textvariable = minT_Var, width = 5)
-minT_ent.place(x = 170, y = 45)
-secT_ent = ttk.Entry(tab_timer, textvariable = secT_Var, width = 5)
-secT_ent.place(x = 210, y = 45)
-
-#countdown labels
-countdown_Var = StringVar()
-countdown_label = Label(tab_timer, textvariable = countdown_Var, font = ("Helvetica", 14, "bold"))
-countdown_label.place(x = 180, y = 100)
-
-#countdown button
-start_timer_btn = ttk.Button(tab_timer , text = "Start").place(x = 255, y = 43)
-
-
-win.mainloop()
+def main():
+    win = Tk()
+    win.geometry("400x300")
+    app = App(win)
+    win.mainloop()
+    
+if __name__ == '__main__':
+    main()
