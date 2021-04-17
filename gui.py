@@ -36,7 +36,7 @@ class App:
         #Alarm time
         self.operation_label = Label(self.tab_alarm, text = 'Operation time:', font = ("Helvetica", 9, "bold")).place(x = 0, y = 90)
         self.time_set = Label(self.tab_alarm)
-        self.time_set.place(x = 90, y = 90)
+        self.time_set.place(x = 92, y = 90)
         #Operations
         self.operation_label = Label(self.tab_alarm, text = "Select operation:", font = ("Helvetica", 9, "bold")).place(x = 0, y = 120)
         self.options_Var = StringVar()
@@ -44,7 +44,7 @@ class App:
         self.optionmenu = ttk.OptionMenu(self.tab_alarm, self.options_Var, "Select an Option", *self.options_list )
         self.optionmenu.place(x = 110, y = 120)
         #submit button
-        self.submit_button = ttk.Button(self.tab_alarm, text = "Submit").place(x = 170, y = 180)
+        self.submit_button = ttk.Button(self.tab_alarm, text = "Submit", command = self.Check_Entry).place(x = 170, y = 180)
         
     def Tab_timer(self):
         #labels
@@ -66,7 +66,7 @@ class App:
         self.Countdown_label = Label(self.tab_timer, textvariable = self.Countdown_Var, font = ("Helvetica", 14, "bold"))
         self.Countdown_label.place(x = 155, y = 150)
         #countdown button
-        self.start_timer_btn = ttk.Button(self.tab_timer, text = "Start").place(x = 260, y = 58)
+        self.start_timer_btn = ttk.Button(self.tab_timer, text = "Start", command = lambda: self.Check_Entry(Timer = True)).place(x = 260, y = 58)
     #adding clock    
     def Realtime(self):
         self.clock_label = Label(self.master)
@@ -78,10 +78,28 @@ class App:
         now = current_time.strftime("%H:%M:%S")
         self.clock_label.config(text = now)
         self.clock_label.after(1000, App.Clock, self)
-        
-    class Functions:
-        def __init__(self):
-            self.current_time = datetime.datetime.now()
+    #Entries check in this method
+    def Check_Entry(self, Timer: bool = False):
+        if not Timer:
+            if (self.hour.get() not in range (0, 24)) or (self.minute.get() not in range (0, 59)) or (self.second.get() not in range (0, 59)):
+                msg.showerror("Error", "Wrong entries, please check your inputs.")
+                self.hour.set(0)
+                self.minute.set(0)
+                self.second.set(0)
+            else:
+                set_alarm = f"{self.hour.get():02d}:{self.minute.get():02d}:{self.second.get():02d}"
+                self.time_set.config(text = set_alarm)
+                pass #*TODO: jaye tabe set kardn alarme  
+        else:
+            if (self.hourT_Var.get() < 0) or (self.minT_Var.get() not in range(0, 59)) or (self.secT_Var.get() not in range(0, 59)):
+                msg.showerror("Error", "Wrong entries, please check your inputs.")
+                self.hourT_Var.set(0)
+                self.minT_Var.set(0)
+                self.secT_Var.set(0)
+            else:
+                pass #*TODO: jaye tabe start countdown
+    #Alarm function
+    def Alarm(self, time):
         
 
 def main():
