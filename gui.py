@@ -3,6 +3,8 @@ from tkinter import ttk
 from tkinter import messagebox as msg
 import time
 import datetime
+import os
+import threading
 
 class App:
     def __init__(self, master):
@@ -89,7 +91,7 @@ class App:
             else:
                 set_alarm = f"{self.hour.get():02d}:{self.minute.get():02d}:{self.second.get():02d}"
                 self.time_set.config(text = set_alarm)
-                pass #*TODO: jaye tabe set kardn alarme  
+                threading.Thread(target = lambda : self.Alarm(set_alarm), daemon = True).start() #*TODO: jaye tabe set kardn alarme  
         else:
             if (self.hourT_Var.get() < 0) or (self.minT_Var.get() not in range(0, 59)) or (self.secT_Var.get() not in range(0, 59)):
                 msg.showerror("Error", "Wrong entries, please check your inputs.")
@@ -99,8 +101,24 @@ class App:
             else:
                 pass #*TODO: jaye tabe start countdown
     #Alarm function
-    def Alarm(self, time):
-        
+    def Alarm(self, Time):
+        while True:
+            time.sleep(1)
+            ops = self.options_Var.get()
+            current_time = datetime.datetime.now()
+            now = current_time.strftime("%H:%M:%S")
+            if now == Time:
+                if ops == 'Alarm':
+                    msg.showinfo('Alarm', 'Times Up!')
+                elif ops == 'Shutdown':
+                    msg.showwarning('Alarm', 'Shutting down...')
+                    os.system("shutdown /s /t")
+                elif ops == 'Restart':
+                    msg.showwarning('Alarm', 'Restarting...')
+                    os.system("shutdown /r /t")
+                else:
+                    msg.showwarning('Alarm', 'Sleeping...')
+                    os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
 
 def main():
     win = Tk()
