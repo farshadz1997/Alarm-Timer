@@ -18,7 +18,7 @@ class App:
         App.Tab_alarm(self)
         App.Tab_timer(self)
         App.Realtime(self)
-        
+    #alarm tab    
     def Tab_alarm(self):
         #labels
         self.Alarm_Label = Label(self.tab_alarm, text = 'Alarm', fg = 'red', font = ("Helvetica", 18, "bold")).place(x = 170, y = 2)
@@ -47,7 +47,7 @@ class App:
         self.optionmenu.place(x = 110, y = 120)
         #submit button
         self.submit_button = ttk.Button(self.tab_alarm, text = "Submit", command = self.Check_Entry).place(x = 170, y = 180)
-        
+    #timer tab    
     def Tab_timer(self):
         #labels
         self.label_topic = Label(self.tab_timer, text = 'Timer', fg = 'red', font = ("Helvetica", 18,"bold")).place(x = 170, y = 2)
@@ -91,7 +91,7 @@ class App:
             else:
                 set_alarm = f"{self.hour.get():02d}:{self.minute.get():02d}:{self.second.get():02d}"
                 self.time_set.config(text = set_alarm)
-                threading.Thread(target = lambda : self.Alarm(set_alarm), daemon = True).start() #*TODO: jaye tabe set kardn alarme  
+                threading.Thread(target = lambda : self.Alarm(set_alarm), daemon = True).start()  
         else:
             if (self.hourT_Var.get() < 0) or (self.minT_Var.get() not in range(0, 59)) or (self.secT_Var.get() not in range(0, 59)):
                 msg.showerror("Error", "Wrong entries, please check your inputs.")
@@ -99,7 +99,7 @@ class App:
                 self.minT_Var.set(0)
                 self.secT_Var.set(0)
             else:
-                pass #*TODO: jaye tabe start countdown
+                pass #*TODO: Countdown Function must placed here
     #Alarm function
     def Alarm(self, Time):
         while True:
@@ -124,7 +124,9 @@ class App:
 
 def main():
     win = Tk()
+    win.title("Alarm & Timer")
     win.geometry("400x300")
+    win.resizable(False, False)
     app = App(win)
     win.mainloop()
     
