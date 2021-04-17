@@ -105,6 +105,8 @@ class App:
         while True:
             time.sleep(1)
             ops = self.options_Var.get()
+            if ops == "Select an Option":
+                self.options_Var.set("Alarm")
             current_time = datetime.datetime.now()
             now = current_time.strftime("%H:%M:%S")
             if now == Time:
