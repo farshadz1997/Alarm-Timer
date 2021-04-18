@@ -63,12 +63,21 @@ class App:
         self.minT_ent.place(x = 170, y = 60)
         self.secT_ent = ttk.Entry(self.tab_timer, textvariable = self.secT_Var, width = 5)
         self.secT_ent.place(x = 210, y = 60)
+        #countdown button
+        self.start_timer_btn = ttk.Button(self.tab_timer, text = "Start", command = lambda: self.Check_Entry(Timer = True))
+        self.start_timer_btn.place(x = 260, y = 58)
+        self.timer_running = True
+        self.cancel_button = ttk.Button(self.tab_timer, text = "Cancel", command = self.Countdown_cancel).place(x = 260, y = 95)
+        #Operations
+        self.operation_label_T = Label(self.tab_timer, text = "Select operation:", font = ("Helvetica", 9, "bold")).place(x = 0, y = 100)
+        self.options_Var_T = StringVar()
+        self.optionmenu_T = ttk.OptionMenu(self.tab_timer, self.options_Var_T, "Select an Option", *self.options_list )
+        self.optionmenu_T.place(x = 110, y = 100)
         #countdown label
         self.Countdown_Var = StringVar()
+        self.Countdown_Var.set("00:00:00")
         self.Countdown_label = Label(self.tab_timer, textvariable = self.Countdown_Var, font = ("Helvetica", 14, "bold"))
-        self.Countdown_label.place(x = 155, y = 150)
-        #countdown button
-        self.start_timer_btn = ttk.Button(self.tab_timer, text = "Start", command = lambda: self.Check_Entry(Timer = True)).place(x = 260, y = 58)
+        self.Countdown_label.place(x = 155, y = 150)     
     #adding clock    
     def Realtime(self):
         self.clock_label = Label(self.master)
@@ -80,11 +89,23 @@ class App:
         now = current_time.strftime("%H:%M:%S")
         self.clock_label.config(text = now)
         self.clock_label.after(1000, App.Clock, self)
-    #Entries check in this method
+    #by pressing cancel button , countdown stops and resets
+    def Countdown_cancel(self):
+            self.timer_running = False
+            self.start_timer_btn['state'] = 'normal'
+            self.Countdown_Var.set("00:00:00")
+            self.times = 0
+    #Entries check and timer or alarm starts
     def Check_Entry(self, Timer: bool = False):
         if not Timer:
-            if (self.hour.get() not in range (0, 24)) or (self.minute.get() not in range (0, 59)) or (self.second.get() not in range (0, 59)):
-                msg.showerror("Error", "Wrong entries, please check your inputs.")
+            try:
+                if (self.hour.get() not in range (0, 24)) or (self.minute.get() not in range (0, 60)) or (self.second.get() not in range (0, 60)):
+                    msg.showerror("Error", "Wrong entries, please check your inputs.")
+                    self.hour.set(0)
+                    self.minute.set(0)
+                    self.second.set(0)
+            except Exception as e:
+                msg.showerror("Error", e)
                 self.hour.set(0)
                 self.minute.set(0)
                 self.second.set(0)
@@ -93,13 +114,19 @@ class App:
                 self.time_set.config(text = set_alarm)
                 threading.Thread(target = lambda : self.Alarm(set_alarm), daemon = True).start()  
         else:
-            if (self.hourT_Var.get() < 0) or (self.minT_Var.get() not in range(0, 59)) or (self.secT_Var.get() not in range(0, 59)):
-                msg.showerror("Error", "Wrong entries, please check your inputs.")
+            try:
+                if (self.hourT_Var.get() < 0) or (self.minT_Var.get() not in range(0, 60)) or (self.secT_Var.get() not in range(0, 60)):
+                    msg.showerror("Error", "Wrong entries, please check your inputs.")
+                    self.hourT_Var.set(0)
+                    self.minT_Var.set(0)
+                    self.secT_Var.set(0)
+            except Exception as e:
+                msg.showerror("Error", e)
                 self.hourT_Var.set(0)
                 self.minT_Var.set(0)
                 self.secT_Var.set(0)
             else:
-                pass #*TODO: Countdown Function must placed here
+                threading.Thread(target = self.Countdown, daemon = True).start() #*TODO: Countdown Function must placed here
     #Alarm function
     def Alarm(self, Time):
         while True:
@@ -112,6 +139,7 @@ class App:
             if now == Time:
                 if ops == 'Alarm':
                     msg.showinfo('Alarm', 'Times Up!')
+                    break
                 elif ops == 'Shutdown':
                     msg.showwarning('Alarm', 'Shutting down...')
                     os.system("shutdown /s /t")
@@ -121,6 +149,37 @@ class App:
                 else:
                     msg.showwarning('Alarm', 'Sleeping...')
                     os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+                    break
+        self.time_set.config(text = "")          
+    #Countdown method for timer
+    def Countdown(self):
+        self.Times = self.hourT_Var.get()*3600 + self.minT_Var.get()*60 + self.secT_Var.get()
+        self.start_timer_btn['state'] = 'disabled'
+        self.timer_running = True
+        while self.timer_running and self.Times >= 0:
+            hour, remain = divmod(self.Times, 3600)
+            mins, secs = divmod(remain, 60)
+            new_time = f"{hour:02d}:{mins:02d}:{secs:02d}"
+            self.Countdown_Var.set(new_time)
+            self.Times -= 1
+            time.sleep(1)
+            ops = self.options_Var_T.get()
+            if ops == "Select an Option":
+                self.options_Var_T.set("Alarm")
+            if self.Times == 0:
+                if ops == 'Alarm':
+                    msg.showinfo('Alarm', 'Times Up!')
+                elif ops == 'Shutdown':
+                    msg.showwarning('Alarm', 'Shutting down...')
+                    os.system("shutdown /s /t")
+                elif ops == 'Restart':
+                    msg.showwarning('Alarm', 'Restarting...')
+                    os.system("shutdown /r /t")
+                else:
+                    msg.showwarning('Alarm', 'Sleeping...')
+                    os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+        self.start_timer_btn['state'] = 'normal'
+        
 
 def main():
     win = Tk()
