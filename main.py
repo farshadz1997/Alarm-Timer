@@ -5,6 +5,7 @@ import time
 import datetime
 import os
 import threading
+import winsound
 
 class App:
     def __init__(self, master):
@@ -126,7 +127,7 @@ class App:
                 self.minT_Var.set(0)
                 self.secT_Var.set(0)
             else:
-                threading.Thread(target = self.Countdown, daemon = True).start() #*TODO: Countdown Function must placed here
+                threading.Thread(target = self.Countdown, daemon = True).start() 
     #Alarm function
     def Alarm(self, Time):
         while True:
@@ -138,6 +139,7 @@ class App:
             now = current_time.strftime("%H:%M:%S")
             if now == Time:
                 if ops == 'Alarm':
+                    winsound.Beep(1000, 3000)
                     msg.showinfo('Alarm', 'Times Up!')
                     break
                 elif ops == 'Shutdown':
@@ -156,18 +158,20 @@ class App:
         self.Times = self.hourT_Var.get()*3600 + self.minT_Var.get()*60 + self.secT_Var.get()
         self.start_timer_btn['state'] = 'disabled'
         self.timer_running = True
-        while self.timer_running and self.Times >= 0:
+        while self.timer_running and self.Times > 0:
             hour, remain = divmod(self.Times, 3600)
             mins, secs = divmod(remain, 60)
             new_time = f"{hour:02d}:{mins:02d}:{secs:02d}"
             self.Countdown_Var.set(new_time)
-            self.Times -= 1
             time.sleep(1)
+            self.Times -= 1
             ops = self.options_Var_T.get()
             if ops == "Select an Option":
                 self.options_Var_T.set("Alarm")
             if self.Times == 0:
+                self.Countdown_Var.set("00:00:00")
                 if ops == 'Alarm':
+                    winsound.Beep(1000, 3000)
                     msg.showinfo('Alarm', 'Times Up!')
                 elif ops == 'Shutdown':
                     msg.showwarning('Alarm', 'Shutting down...')
