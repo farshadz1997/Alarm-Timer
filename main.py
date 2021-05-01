@@ -19,6 +19,7 @@ class App:
         App.Tab_alarm(self)
         App.Tab_timer(self)
         App.Realtime(self)
+    
     #alarm tab    
     def Tab_alarm(self):
         #labels
@@ -46,8 +47,13 @@ class App:
         self.options_list = ["Alarm", "Shutdown", "Restart", "Sleep"]
         self.optionmenu = ttk.OptionMenu(self.tab_alarm, self.options_Var, "Select an Option", *self.options_list )
         self.optionmenu.place(x = 110, y = 120)
-        #submit button
-        self.submit_button = ttk.Button(self.tab_alarm, text = "Submit", command = self.Check_Entry).place(x = 170, y = 180)
+        #submit & cancel button
+        self.alarm_running = True
+        self.submit_button = ttk.Button(self.tab_alarm, text = "Submit", command = self.Check_Entry)
+        self.submit_button.place(x = 140, y = 180)
+        self.cancel_button = ttk.Button(self.tab_alarm, text = "Cancel", command = self.Alarm_cancel)
+        self.cancel_button.place(x = 220, y = 180)
+    
     #timer tab    
     def Tab_timer(self):
         #labels
@@ -79,23 +85,33 @@ class App:
         self.Countdown_Var.set("00:00:00")
         self.Countdown_label = Label(self.tab_timer, textvariable = self.Countdown_Var, font = ("Helvetica", 14, "bold"))
         self.Countdown_label.place(x = 155, y = 150)     
+    
     #adding clock    
     def Realtime(self):
         self.clock_label = Label(self.master)
         self.clock_label.place(x = 353, y = 280)
         App.Clock(self)
+    
     #check clock loop    
     def Clock(self):
         current_time = datetime.datetime.now()
         now = current_time.strftime("%H:%M:%S")
         self.clock_label.config(text = now)
         self.clock_label.after(1000, App.Clock, self)
+    
     #by pressing cancel button , countdown stops and resets
     def Countdown_cancel(self):
             self.timer_running = False
             self.start_timer_btn['state'] = 'normal'
             self.Countdown_Var.set("00:00:00")
             self.times = 0
+    
+    #by pressing cancel button , alarm resets
+    def Alarm_cancel(self):
+        self.time_set.config(text = "")
+        self.alarm_running = False
+        self.submit_button ['state'] = 'normal'
+    
     #Entries check and timer or alarm starts
     def Check_Entry(self, Timer: bool = False):
         if not Timer:
@@ -111,6 +127,8 @@ class App:
                 self.minute.set(0)
                 self.second.set(0)
             else:
+                self.alarm_running = True
+                self.submit_button ['state'] = 'disabled'
                 set_alarm = f"{self.hour.get():02d}:{self.minute.get():02d}:{self.second.get():02d}"
                 self.time_set.config(text = set_alarm)
                 threading.Thread(target = lambda : self.Alarm(set_alarm), daemon = True).start()  
@@ -130,7 +148,7 @@ class App:
                 threading.Thread(target = self.Countdown, daemon = True).start() 
     #Alarm function
     def Alarm(self, Time):
-        while True:
+        while self.alarm_running:
             time.sleep(1)
             ops = self.options_Var.get()
             if ops == "Select an Option":
@@ -144,15 +162,16 @@ class App:
                     break
                 elif ops == 'Shutdown':
                     msg.showwarning('Alarm', 'Shutting down...')
-                    os.system("shutdown /s /t")
+                    os.system("shutdown /s /3")
                 elif ops == 'Restart':
                     msg.showwarning('Alarm', 'Restarting...')
-                    os.system("shutdown /r /t")
+                    os.system("shutdown /r /3")
                 else:
                     msg.showwarning('Alarm', 'Sleeping...')
                     os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
                     break
-        self.time_set.config(text = "")          
+        self.time_set.config(text = "")
+        self.submit_button ['state'] = 'normal'       
     #Countdown method for timer
     def Countdown(self):
         self.Times = self.hourT_Var.get()*3600 + self.minT_Var.get()*60 + self.secT_Var.get()
@@ -175,10 +194,10 @@ class App:
                     msg.showinfo('Alarm', 'Times Up!')
                 elif ops == 'Shutdown':
                     msg.showwarning('Alarm', 'Shutting down...')
-                    os.system("shutdown /s /t")
+                    os.system("shutdown /s /3")
                 elif ops == 'Restart':
                     msg.showwarning('Alarm', 'Restarting...')
-                    os.system("shutdown /r /t")
+                    os.system("shutdown /r /3")
                 else:
                     msg.showwarning('Alarm', 'Sleeping...')
                     os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
