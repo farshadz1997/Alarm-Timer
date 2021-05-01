@@ -146,6 +146,7 @@ class App:
                 self.secT_Var.set(0)
             else:
                 threading.Thread(target = self.Countdown, daemon = True).start() 
+    
     #Alarm function
     def Alarm(self, Time):
         while self.alarm_running:
@@ -161,17 +162,15 @@ class App:
                     msg.showinfo('Alarm', 'Times Up!')
                     break
                 elif ops == 'Shutdown':
-                    msg.showwarning('Alarm', 'Shutting down...')
-                    os.system("shutdown /s /3")
+                    os.system("shutdown /s /t 3")
                 elif ops == 'Restart':
-                    msg.showwarning('Alarm', 'Restarting...')
-                    os.system("shutdown /r /3")
+                    os.system("shutdown /r /t 3")
                 else:
-                    msg.showwarning('Alarm', 'Sleeping...')
                     os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
                     break
         self.time_set.config(text = "")
         self.submit_button ['state'] = 'normal'       
+    
     #Countdown method for timer
     def Countdown(self):
         self.Times = self.hourT_Var.get()*3600 + self.minT_Var.get()*60 + self.secT_Var.get()
@@ -193,13 +192,10 @@ class App:
                     winsound.Beep(1000, 3000)
                     msg.showinfo('Alarm', 'Times Up!')
                 elif ops == 'Shutdown':
-                    msg.showwarning('Alarm', 'Shutting down...')
-                    os.system("shutdown /s /3")
+                    os.system("shutdown /s /t 3")
                 elif ops == 'Restart':
-                    msg.showwarning('Alarm', 'Restarting...')
-                    os.system("shutdown /r /3")
+                    os.system("shutdown /r /t 3")
                 else:
-                    msg.showwarning('Alarm', 'Sleeping...')
                     os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
         self.start_timer_btn['state'] = 'normal'
         
